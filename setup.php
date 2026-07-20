@@ -45,6 +45,25 @@ function plugin_osmanager_install()
 {
     global $DB;
 
+    $log = __DIR__ . '/_install.log';
+    file_put_contents($log, date('Y-m-d H:i:s') . " install start\n", FILE_APPEND);
+
+    register_shutdown_function(function () use ($log) {
+        $e = error_get_last();
+        if ($e && in_array($e['type'], [E_ERROR, E_PARSE, E_COMPILE_ERROR], true)) {
+            file_put_contents(
+                $log,
+                "FATAL: {$e['message']} in {$e['file']}:{$e['line']}\n",
+                FILE_APPEND
+            );
+        }
+    });
+
+    if (!isset($DB) || !($DB instanceof DBmysql)) {
+        file_put_contents($log, "DB not available\n", FILE_APPEND);
+        return false;
+    }
+
     $tables = [
         'glpi_plugin_osmanager_orders' => "
             CREATE TABLE IF NOT EXISTS `glpi_plugin_osmanager_orders` (
@@ -116,10 +135,16 @@ function plugin_osmanager_install()
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
     ];
 
-    foreach ($tables as $sql) {
-        $DB->queryOrDie($sql, $DB->error());
+    foreach ($tables as $name => $sql) {
+        if (!$DB->query($sql)) {
+            $err = $DB->error();
+            file_put_contents($log, "SQL ERROR on {$name}: {$err}\n", FILE_APPEND);
+            return false;
+        }
+        file_put_contents($log, "OK: {$name}\n", FILE_APPEND);
     }
 
+    file_put_contents($log, "install done\n", FILE_APPEND);
     return true;
 }
 
