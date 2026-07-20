@@ -13,6 +13,23 @@ define('PLUGIN_OSMANAGER_VERSION', '1.0.0');
 define('PLUGIN_OSMANAGER_MIN_GLPI', '11.0');
 define('PLUGIN_OSMANAGER_MAX_GLPI', '11.99');
 
+function plugin_version_osmanager()
+{
+    return [
+        'name'         => 'OS Manager',
+        'version'      => PLUGIN_OSMANAGER_VERSION,
+        'author'       => 'OsManager',
+        'license'      => 'GPLv2+',
+        'homepage'     => '',
+        'requirements' => [
+            'glpi' => [
+                'min' => PLUGIN_OSMANAGER_MIN_GLPI,
+                'max' => PLUGIN_OSMANAGER_MAX_GLPI,
+            ],
+        ],
+    ];
+}
+
 function plugin_init_osmanager()
 {
     global $PLUGIN_HOOKS;
