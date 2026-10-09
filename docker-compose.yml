@@ -1,0 +1,35 @@
+services:
+  db:
+    image: mariadb:10.11
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: glpi
+      MARIADB_USER: glpi
+      MARIADB_PASSWORD: glpi
+    volumes:
+      - dbdata:/var/lib/mysql
+      # Tabelas do app (seguro em qualquer GLPI)
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      # Dados de DEMO — REMOVA esta linha ao usar um banco GLPI real
+      # - ./docker/demo.sql:/docker-entrypoint-initdb.d/demo.sql:ro
+    ports:
+      - "3306:3306"
+
+  osmanager:
+    build: ./docker
+    depends_on:
+      - db
+    environment:
+      # >>> Para usar seu GLPI real, troque estes valores pelo banco do GLPI <<<
+      # (host acessível a partir deste container, ex: via túnel SSH ou IP da VPS)
+      OS_DB_HOST: 195.200.7.192
+      OS_DB_NAME: glpi
+      OS_DB_USER: glpi
+      OS_DB_PASS: troque_esta_senha
+    volumes:
+      - ./app:/var/www/html
+    ports:
+      - "8081:80"
+
+volumes:
+  dbdata:
